@@ -1,8 +1,20 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResult, CurationFilters, RefinedItem } from "../types";
+import { Language } from "../src/i18n";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+const getAI = () => {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY or API_KEY environment variable is required");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+};
 
 const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 5, initialDelayMs = 2000): Promise<T> => {
   let attempt = 0;
@@ -44,7 +56,7 @@ const getTodayDate = () => new Date().toLocaleDateString('en-US', {
 /**
  * THE DISCOVERY ENGINE (SCANNER)
  */
-export const discoverTrendingAINews = async (filters: CurationFilters) => {
+export const discoverTrendingAINews = async (filters: CurationFilters, lang: Language) => {
   const model = "gemini-3-flash-preview";
   const today = getTodayDate();
   
@@ -73,7 +85,7 @@ export const discoverTrendingAINews = async (filters: CurationFilters) => {
     - 85-94: High-impact technical updates.
     - <85: Do not return.
 
-    Language: Hebrew.
+    Language: ${lang === 'he' ? 'Hebrew' : 'English'}.
   `;
 
   const userPrompt = `
@@ -86,11 +98,11 @@ export const discoverTrendingAINews = async (filters: CurationFilters) => {
     ${filters.isTrending ? "PRIORITY: Focus on rapid adoption and developer velocity." : ""}
     ${filters.isViral ? "PRIORITY: Focus on social hype and non-obvious breakthroughs." : ""}
 
-    Provide 5-8 high-signal items in Hebrew. Output JSON ONLY.
+    Provide 5-8 high-signal items in ${lang === 'he' ? 'Hebrew' : 'English'}. Output JSON ONLY.
   `;
 
   try {
-    const response = await withRetry(() => ai.models.generateContent({
+    const response = await withRetry(() => getAI().models.generateContent({
       model: model,
       contents: userPrompt,
       config: {
@@ -135,7 +147,7 @@ export const discoverTrendingAINews = async (filters: CurationFilters) => {
 /**
  * THE REFINING ENGINE (SUPER-MENTOR)
  */
-export const refineCuratedContent = async (rawItem: any): Promise<RefinedItem> => {
+export const refineCuratedContent = async (rawItem: any, lang: Language): Promise<RefinedItem> => {
   const model = "gemini-3-pro-preview";
   const today = getTodayDate();
 
@@ -148,10 +160,10 @@ export const refineCuratedContent = async (rawItem: any): Promise<RefinedItem> =
     2. W. Chan Kim (Blue Ocean): Eliminate/Create - does this bypass competition?
     3. Paul Graham (YC): The Secret - what is the non-obvious unfair advantage?
 
-    WRITING STYLE (HEBREW):
+    WRITING STYLE (${lang === 'he' ? 'HEBREW' : 'ENGLISH'}):
     - Tone: Minimalist, elite, visionary.
     - Headers: 'PREMIUM HOOK', 'THE 1% CASE', 'CURATOR VERDICT'.
-    - Language: High-Tech Hebrew with English terms (Inference, RAG, Latency, etc.).
+    - Language: ${lang === 'he' ? 'High-Tech Hebrew with English terms (Inference, RAG, Latency, etc.)' : 'High-Tech English'}.
 
     FEW-SHOT EXAMPLES:
     ITEM: Groq LPU v2
@@ -165,7 +177,7 @@ export const refineCuratedContent = async (rawItem: any): Promise<RefinedItem> =
   const userPrompt = `Refine this signal (Context: ${today}): ${JSON.stringify(rawItem)}`;
 
   try {
-    const response = await withRetry(() => ai.models.generateContent({
+    const response = await withRetry(() => getAI().models.generateContent({
       model: model,
       contents: userPrompt,
       config: {
@@ -196,15 +208,15 @@ export const refineCuratedContent = async (rawItem: any): Promise<RefinedItem> =
   }
 };
 
-export const getMarketAnalysis = async (ideaDescription: string): Promise<AnalysisResult> => {
+export const getMarketAnalysis = async (ideaDescription: string, lang: Language): Promise<AnalysisResult> => {
   const today = getTodayDate();
   const prompt = `
     CURRENT DATE: ${today}.
     Analyze this product idea: "${ideaDescription}"
     Fusing Cagan, Kim, and Graham mental models. 
-    Identify competitors and frictions in Hebrew based on current market data from ${today}.
+    Identify competitors and frictions in ${lang === 'he' ? 'Hebrew' : 'English'} based on current market data from ${today}.
   `;
-  const response = await withRetry(() => ai.models.generateContent({
+  const response = await withRetry(() => getAI().models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
@@ -260,7 +272,7 @@ export const getMarketAnalysis = async (ideaDescription: string): Promise<Analys
 };
 
 export const generateBrandMascot = async (): Promise<string> => {
-  const response = await withRetry(() => ai.models.generateContent({
+  const response = await withRetry(() => getAI().models.generateContent({
     model: 'gemini-2.5-flash-image',
     contents: { parts: [{ text: 'Ultra-premium 8k portrait of an AI curator mascot, translucent glass and liquid chrome textures, soft purple and teal neon lighting, Apple aesthetic.' }] }
   }));

@@ -1,11 +1,7 @@
 # Super-Mentor-AI: The AI Curator & Strategy Engine
 
 ## 1. Short Description
-**Super-Mentor-AI** is an elite, real-time strategic intelligence engine. It fuses the mental models of top product visionaries (Marty Cagan, Paul Graham, W. Chan Kim) with live market data to curate, refine, and validate your next big AI product idea. It doesn't just summarize news; it identifies "Blue Ocean" opportunities and unfair advantages in the rapidly evolving AI landscape. 
-
-What do the mental models of top product visionaries (Marty Cagan, Paul Graham, W. Chan Kim) mean? The term itself may sound like AI fluff to you, even the model I work with rejected this wording for the readme for this reason. Why isn't it fluff? Because the prompt I formulated when I created Super Mentor AI was exactly this: "Create a board of directors consisting of these three personalities, any idea that is presented to them will be filtered by each of these characters with a character trait that is unique to them."
-
-(If you are interested in learning more about them, visit this link https://share.google/aimode/nIWKqjLlJtBrmI3uE) 
+**Super-Mentor-AI** is an elite, real-time strategic intelligence engine. It fuses the mental models of top product visionaries (Marty Cagan, Paul Graham, W. Chan Kim) with live market data to curate, refine, and validate your next big AI product idea. It doesn't just summarize news; it identifies "Blue Ocean" opportunities and unfair advantages in the rapidly evolving AI landscape.
 
 ## 2. Pricing Tiers
 

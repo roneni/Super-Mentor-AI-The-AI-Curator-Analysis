@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   getMarketAnalysis, 
   discoverTrendingAINews, 
@@ -8,6 +9,7 @@ import {
 } from './services/geminiService';
 import { AnalysisResult, AIDomain, AICompany, CurationFilters, RefinedItem } from './types';
 import { ContactForm } from './src/components/ContactForm';
+import { translations, Language } from './src/i18n';
 
 const AI_DOMAINS: AIDomain[] = [
   { id: 'experimental', name: 'Experimental Tools', subfields: ['Google Labs', 'Edge Cases', 'Creative Tech', 'Future UX', 'Unstable Releases', 'Alpha Prototypes', 'Quantum AI', 'Brain-Computer Interfaces'] },
@@ -53,6 +55,17 @@ const SOCIAL_PLATFORMS = [
 interface PhysicsObject { id: string; x: number; y: number; vx: number; vy: number; w: number; h: number; }
 
 const App: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const lang: Language = location.pathname.startsWith('/he') ? 'he' : 'en';
+
+  useEffect(() => {
+    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  const t = translations[lang];
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalysisResult | null>(null);
@@ -99,7 +112,7 @@ const App: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const analysis = await getMarketAnalysis(ideaDescription);
+        const analysis = await getMarketAnalysis(ideaDescription, lang);
         setData(analysis);
       } catch (err: any) { 
         console.error(err);
@@ -157,7 +170,7 @@ const App: React.FC = () => {
   const handleDiscovery = async () => {
     setIsSyncing(true);
     try {
-      const news = await discoverTrendingAINews(filters);
+      const news = await discoverTrendingAINews(filters, lang);
       setDiscoveredAlerts(news);
     } catch (e) { console.error(e); } finally { setIsSyncing(false); }
   };
@@ -165,7 +178,7 @@ const App: React.FC = () => {
   const handleRefineItem = async (tool: any) => {
     setRefiningId(tool.id);
     try {
-      const refined = await refineCuratedContent(tool);
+      const refined = await refineCuratedContent(tool, lang);
       setRefinedItems(prev => [refined, ...prev.filter(item => item.id !== tool.id)]);
     } catch (e) { console.error(e); } finally { setRefiningId(null); }
   };
@@ -244,8 +257,8 @@ const App: React.FC = () => {
         <div className="w-20 h-20 bg-gradient-to-tr from-purple-500 to-teal-400 rounded-full animate-pulse mb-8 flex items-center justify-center shadow-[0_0_50px_rgba(168,85,247,0.4)]">
            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <h1 className="text-3xl font-black tracking-tighter uppercase italic bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">Initializing Cosmic Deep-Scan...</h1>
-        <p className="text-gray-600 font-bold tracking-widest mt-2 uppercase text-[10px]">Syncing with April 2026 Ecosystem</p>
+        <h1 className="text-3xl font-black tracking-tighter uppercase italic bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">{t.init_scan}</h1>
+        <p className="text-gray-600 font-bold tracking-widest mt-2 uppercase text-[10px]">{t.init_sub}</p>
       </div>
     );
   }
@@ -256,17 +269,17 @@ const App: React.FC = () => {
         <div className="w-20 h-20 bg-red-500/20 text-red-500 rounded-full mb-8 flex items-center justify-center shadow-[0_0_50px_rgba(239,68,68,0.4)]">
            <span className="text-4xl">⚠️</span>
         </div>
-        <h1 className="text-3xl font-black tracking-tighter uppercase italic text-red-400 mb-4">System Overload</h1>
+        <h1 className="text-3xl font-black tracking-tighter uppercase italic text-red-400 mb-4">{t.overload_title}</h1>
         <p className="text-gray-400 max-w-md mb-8">{error}</p>
         <button onClick={() => window.location.reload()} className="px-8 py-4 bg-white text-black font-black uppercase tracking-widest rounded-full hover:bg-gray-200 transition-all">
-          Retry Connection
+          {t.retry}
         </button>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-black text-white selection:bg-purple-500 overflow-x-hidden ${isAntigravityActive ? 'border-4 border-cyan-500/20' : ''}`} dir="rtl">
+    <div className={`min-h-screen bg-black text-white selection:bg-purple-500 overflow-x-hidden ${isAntigravityActive ? 'border-4 border-cyan-500/20' : ''}`} dir={lang === 'he' ? 'rtl' : 'ltr'}>
       {/* Decorative Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full"></div>
@@ -276,23 +289,26 @@ const App: React.FC = () => {
       <nav className="max-w-7xl mx-auto px-10 py-10 flex justify-between items-center no-print relative z-[100]">
         <div className="flex items-center gap-10">
           <div className="flex flex-col">
-            <div className="text-3xl font-black tracking-tighter uppercase italic bg-clip-text text-transparent bg-gradient-to-l from-white to-gray-600">AI CURATOR.</div>
-            <span className="text-[8px] font-black text-purple-400 tracking-[0.5em] uppercase">Signal Intelligence v3.2</span>
+            <div className="text-3xl font-black tracking-tighter uppercase italic bg-clip-text text-transparent bg-gradient-to-l from-white to-gray-600">{t.navTitle}</div>
+            <span className="text-[8px] font-black text-purple-400 tracking-[0.5em] uppercase">{t.navSubtitle}</span>
           </div>
           <div className="h-10 w-[1px] bg-white/10"></div>
           <button onClick={() => setIsContactModalOpen(true)} className="flex items-center gap-3 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-            CONTACT SALES
+            {t.contactSales}
           </button>
           <button onClick={() => githubUser ? pushToGitHub() : setIsGitHubModalOpen(true)} className={`flex items-center gap-3 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${githubUser ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'bg-white/5 text-gray-500 border border-white/5 hover:bg-white/10 hover:text-white'}`}>
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            {isSyncingToGitHub ? 'SYNCING...' : githubUser ? 'PUSH TO GITHUB' : 'CONNECT GITHUB'}
+            {isSyncingToGitHub ? t.syncing : githubUser ? t.pushToGithub : t.connectGithub}
           </button>
           <button onClick={() => setIsAntigravityActive(!isAntigravityActive)} className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isAntigravityActive ? 'bg-cyan-500 text-black shadow-[0_0_30px_rgba(6,182,212,0.6)]' : 'bg-white/5 text-white hover:bg-white/10 hover:border-white/20 border border-transparent'}`} title="Toggle Google Antigravity Mode"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg></button>
+          <button onClick={() => navigate(lang === 'en' ? '/he' : '/')} className="px-4 py-2 border border-white/20 rounded-full text-xs font-black uppercase text-gray-400 hover:text-white transition-all ml-4">
+            {lang === 'en' ? 'עברית' : 'English'}
+          </button>
         </div>
         <div className="flex gap-10">
           {['analysis', 'spec', 'discovery', 'public'].map(v => (
             <button key={v} onClick={() => setView(v as any)} className={`text-[11px] font-black uppercase tracking-[0.3em] transition-all relative py-2 ${view === v ? 'text-purple-400' : 'text-gray-500 hover:text-white'}`}>
-              {v === 'analysis' ? 'Strategy' : v === 'spec' ? 'MVP Spec' : v === 'discovery' ? 'Production Line' : 'Public Feed'}
+              {v === 'analysis' ? t.strategy : v === 'spec' ? t.mvpSpec : v === 'discovery' ? t.productionLine : t.publicFeed}
               {view === v && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-teal-400 rounded-full"></div>}
             </button>
           ))}
@@ -301,15 +317,15 @@ const App: React.FC = () => {
 
       {view === 'discovery' && (
         <div className="max-w-7xl mx-auto px-10 pb-40 space-y-16 animate-in slide-in-from-bottom-8 duration-1000">
-          <header className="flex flex-col md:flex-row justify-between items-end gap-10 text-right border-b border-white/5 pb-16">
+          <header className={`flex flex-col md:flex-row justify-between items-end gap-10 text-start border-b border-white/5 pb-16`}>
              <div className="space-y-6">
-                <div className="flex items-center justify-end gap-3"><span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-widest rounded-full">Autonomous Engine</span><h2 className="text-gray-600 text-sm font-black uppercase tracking-[0.4em]">Section 01</h2></div>
-                <h1 className="text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">Production <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-purple-400 to-teal-300">Line.</span></h1>
-                <p className="text-gray-500 text-xl font-medium max-w-xl mr-auto leading-relaxed">מנוע הזיקוק לתוכן פרימיום. סינון רעשים, זיהוי סיגנלים והחלת קול המותג בזמן אמת.</p>
+                <div className={`flex items-center gap-3 ${lang === 'he' ? 'justify-end ' : ''}`}><span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-widest rounded-full">{t.autonomousEngine}</span><h2 className="text-gray-600 text-sm font-black uppercase tracking-[0.4em]">{t.section01}</h2></div>
+                <h1 className="text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">{t.prodLine1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-purple-400 to-teal-300">{t.prodLine2}</span></h1>
+                <p className={`text-gray-500 text-xl font-medium max-w-xl ${lang === 'he' ? 'me-auto' : 'ms-auto'} leading-relaxed`}>{t.prodLineDesc}</p>
              </div>
              <div className="flex flex-col items-end gap-6 p-10 bg-white/5 rounded-[40px] border border-white/5 backdrop-blur-3xl shadow-2xl">
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-black text-gray-600 uppercase mb-2">Active Brand Persona</span>
+                  <span className="text-[10px] font-black text-gray-600 uppercase mb-2">{t.activePersona}</span>
                   {mascotUrl ? (
                     <div className="relative group">
                       <img src={mascotUrl} className="w-24 h-24 rounded-3xl object-cover shadow-2xl border border-white/10 group-hover:scale-110 transition duration-700" alt="Mascot" />
@@ -320,7 +336,7 @@ const App: React.FC = () => {
                   )}
                 </div>
                 <button onClick={handleMascotGenerate} disabled={isGeneratingMascot} className={`px-10 py-5 ${mascotUrl ? 'bg-white/5 text-gray-400 border border-white/10' : 'bg-white text-black'} font-black rounded-full text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition shadow-xl`}>
-                  {isGeneratingMascot ? 'SCAFFOLDING...' : mascotUrl ? 'RE-GENERATE VOICE' : 'INITIALIZE MASCOT'}
+                  {isGeneratingMascot ? t.scaffolding : mascotUrl ? t.regenPersona : t.initMascot}
                 </button>
              </div>
           </header>
@@ -328,26 +344,26 @@ const App: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-6 gap-12">
             <div className="lg:col-span-2 space-y-10 bg-[#0a0a0a] p-10 rounded-[50px] border border-white/5 self-start shadow-2xl sticky top-10">
               <div className="space-y-6">
-                <h3 className="text-[11px] font-black text-amber-400 uppercase tracking-widest flex items-center justify-end gap-3">Intelligence Mode <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span></h3>
+                <h3 className="text-[11px] font-black text-amber-400 uppercase tracking-widest flex items-center justify-end gap-3">{t.intelMode} <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span></h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <button onClick={() => setFilters(f => ({ ...f, isTrending: !f.isTrending }))} className={`px-4 py-5 rounded-[24px] text-[10px] font-black transition-all flex flex-col items-center gap-2 border ${filters.isTrending ? 'bg-amber-600 text-white border-amber-400 shadow-[0_0_30px_rgba(217,119,6,0.4)]' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}><span className="text-2xl">🔥</span>TRENDING</button>
-                  <button onClick={() => setFilters(f => ({ ...f, isViral: !f.isViral }))} className={`px-4 py-5 rounded-[24px] text-[10px] font-black transition-all flex flex-col items-center gap-2 border ${filters.isViral ? 'bg-pink-600 text-white border-pink-400 shadow-[0_0_30px_rgba(219,39,119,0.4)]' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}><span className="text-2xl">🚀</span>VIRAL</button>
+                  <button onClick={() => setFilters(f => ({ ...f, isTrending: !f.isTrending }))} className={`px-4 py-5 rounded-[24px] text-[10px] font-black transition-all flex flex-col items-center gap-2 border ${filters.isTrending ? 'bg-amber-600 text-white border-amber-400 shadow-[0_0_30px_rgba(217,119,6,0.4)]' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}><span className="text-2xl">🔥</span>{t.trending}</button>
+                  <button onClick={() => setFilters(f => ({ ...f, isViral: !f.isViral }))} className={`px-4 py-5 rounded-[24px] text-[10px] font-black transition-all flex flex-col items-center gap-2 border ${filters.isViral ? 'bg-pink-600 text-white border-pink-400 shadow-[0_0_30px_rgba(219,39,119,0.4)]' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}><span className="text-2xl">🚀</span>{t.viral}</button>
                 </div>
-                <div className="p-4 bg-black/40 rounded-2xl text-center border border-white/5"><p className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Active Scan Date: <span className="text-white">APRIL 2026</span></p></div>
+                <div className="p-4 bg-black/40 rounded-2xl text-center border border-white/5"><p className="text-[9px] text-gray-500 uppercase font-black tracking-widest">{t.activeScan}</p></div>
               </div>
 
               <div className="space-y-6">
-                <h3 className="text-[11px] font-black text-purple-400 uppercase tracking-widest border-b border-purple-500/10 pb-4">1. Market Domains</h3>
+                <h3 className="text-[11px] font-black text-purple-400 uppercase tracking-widest border-b border-purple-500/10 pb-4">{t.marketDomains}</h3>
                 <div className="flex flex-col gap-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-3">
                   {AI_DOMAINS.map(d => (
-                    <button key={d.id} onClick={() => toggleDomain(d.id)} className={`w-full text-right px-6 py-4 rounded-2xl text-[11px] font-black transition-all border ${filters.selectedDomains.includes(d.id) ? 'bg-purple-600 text-white border-purple-400 shadow-xl scale-[1.02]' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}>{d.name}</button>
+                    <button key={d.id} onClick={() => toggleDomain(d.id)} className={`w-full text-start px-6 py-4 rounded-2xl text-[11px] font-black transition-all border ${filters.selectedDomains.includes(d.id) ? 'bg-purple-600 text-white border-purple-400 shadow-xl scale-[1.02]' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}>{d.name}</button>
                   ))}
                 </div>
               </div>
 
               {filters.selectedDomains.length > 0 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
-                  <h3 className="text-[11px] font-black text-blue-400 uppercase tracking-widest border-b border-blue-500/10 pb-4">2. Deep-Scan Subfields</h3>
+                  <h3 className="text-[11px] font-black text-blue-400 uppercase tracking-widest border-b border-blue-500/10 pb-4">{t.deepScanSubfields}</h3>
                   <div className="flex flex-wrap gap-2">
                     {AI_DOMAINS.filter(d => filters.selectedDomains.includes(d.id)).map(d => 
                       d.subfields.map(sf => (
@@ -359,7 +375,7 @@ const App: React.FC = () => {
               )}
 
               <div className="space-y-6">
-                <h3 className="text-[11px] font-black text-emerald-400 uppercase tracking-widest border-b border-emerald-500/10 pb-4">3. Entity Tracking</h3>
+                <h3 className="text-[11px] font-black text-emerald-400 uppercase tracking-widest border-b border-emerald-500/10 pb-4">{t.entityTracking}</h3>
                 <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-3">
                   {AI_ECOSYSTEM_TREE.map(company => (
                     <div key={company.id} className="space-y-3">
@@ -372,7 +388,7 @@ const App: React.FC = () => {
                         </button>
                         <button 
                           onClick={() => toggleCompanySelection(company.name)}
-                          className={`flex-1 text-right px-6 py-3.5 rounded-2xl text-[11px] font-black transition-all border ${filters.selectedCompanies.includes(company.name) ? 'bg-emerald-600 text-white border-emerald-400' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}
+                          className={`flex-1 text-start px-6 py-3.5 rounded-2xl text-[11px] font-black transition-all border ${filters.selectedCompanies.includes(company.name) ? 'bg-emerald-600 text-white border-emerald-400' : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10'}`}
                         >
                           {company.name}
                         </button>
@@ -384,7 +400,7 @@ const App: React.FC = () => {
                             <button 
                               key={topic}
                               onClick={() => toggleSubtopic(topic)}
-                              className={`text-right px-5 py-2.5 rounded-xl text-[10px] font-black transition-all border ${filters.selectedSubtopics.includes(topic) ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-gray-600 bg-white/5 border-transparent hover:text-gray-400'}`}
+                              className={`text-start px-5 py-2.5 rounded-xl text-[10px] font-black transition-all border ${filters.selectedSubtopics.includes(topic) ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-gray-600 bg-white/5 border-transparent hover:text-gray-400'}`}
                             >
                               ↳ {topic}
                             </button>
@@ -397,58 +413,58 @@ const App: React.FC = () => {
               </div>
 
               <button onClick={handleDiscovery} disabled={isSyncing} className="w-full py-7 bg-white text-black font-black rounded-3xl hover:bg-gray-200 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)] text-[11px] tracking-[0.4em] uppercase active:scale-95">
-                {isSyncing ? 'DEEP SCANNING...' : 'LAUNCH SCAN 2.0'}
+                {isSyncing ? t.deepScanning : t.launchScan}
               </button>
             </div>
 
             <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-10">
               <div className="space-y-8 bg-white/2 p-8 rounded-[50px] border border-white/5">
-                <div className="flex justify-between items-center border-b border-white/5 pb-6"><h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.4em]">01. Inbox</h3><span className="text-[10px] bg-white/5 px-3 py-1 rounded-full text-gray-600 font-black">N={discoveredAlerts.length}</span></div>
+                <div className="flex justify-between items-center border-b border-white/5 pb-6"><h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.4em]">{t.inbox}</h3><span className="text-[10px] bg-white/5 px-3 py-1 rounded-full text-gray-600 font-black">N={discoveredAlerts.length}</span></div>
                 <div className="space-y-6 max-h-[1000px] overflow-y-auto pr-4 custom-scrollbar">
                   {discoveredAlerts.map(alert => (
                     <div key={alert.id} className="bg-[#0f0f0f] border border-white/5 p-8 rounded-[45px] space-y-6 group hover:border-purple-500/40 transition-all duration-700 shadow-xl relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full bg-purple-500/20"></div>
-                      <div className="flex justify-between items-start flex-row-reverse gap-4">
+                      <div className="flex justify-between items-start  gap-4">
                         <h4 className="font-black text-white text-lg leading-tight flex-1">{alert.title}</h4>
                         <div className="flex flex-col items-center">
                           <span className="text-purple-400 font-black text-2xl">{alert.score}</span>
-                          <span className="text-[8px] text-gray-600 font-black uppercase">Signal</span>
+                          <span className="text-[8px] text-gray-600 font-black uppercase">{t.signal}</span>
                         </div>
                       </div>
                       <p className="text-gray-500 text-[11px] italic font-medium leading-relaxed bg-black/40 p-5 rounded-2xl border border-white/5">"{alert.summary}"</p>
                       <div className="flex gap-4 pt-4 border-t border-white/5">
-                        <button onClick={() => { setApprovedTools([alert, ...approvedTools]); setDiscoveredAlerts(d => d.filter(i=>i.id !== alert.id)); }} className="flex-1 py-4 bg-emerald-600/10 text-emerald-400 font-black rounded-2xl text-[10px] hover:bg-emerald-600 hover:text-white transition uppercase tracking-widest">Approve</button>
-                        <button onClick={() => setDiscoveredAlerts(d => d.filter(i=>i.id !== alert.id))} className="px-6 py-4 bg-white/5 text-gray-600 rounded-2xl text-[10px] uppercase font-black hover:text-red-500 transition">Discard</button>
+                        <button onClick={() => { setApprovedTools([alert, ...approvedTools]); setDiscoveredAlerts(d => d.filter(i=>i.id !== alert.id)); }} className="flex-1 py-4 bg-emerald-600/10 text-emerald-400 font-black rounded-2xl text-[10px] hover:bg-emerald-600 hover:text-white transition uppercase tracking-widest">{t.approve}</button>
+                        <button onClick={() => setDiscoveredAlerts(d => d.filter(i=>i.id !== alert.id))} className="px-6 py-4 bg-white/5 text-gray-600 rounded-2xl text-[10px] uppercase font-black hover:text-red-500 transition">{t.discard}</button>
                       </div>
                     </div>
                   ))}
                   {discoveredAlerts.length === 0 && !isSyncing && (
                     <div className="py-40 text-center space-y-4">
                       <div className="text-4xl">📡</div>
-                      <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest">No Active Scans Found</p>
+                      <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest">{t.inboxEmpty}</p>
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="space-y-8 bg-white/2 p-8 rounded-[50px] border border-white/5">
-                <div className="flex justify-between items-center border-b border-purple-500/10 pb-6"><h3 className="text-[11px] font-black text-purple-400 uppercase tracking-[0.4em]">02. Refinement</h3><span className="text-[10px] bg-purple-500/10 px-3 py-1 rounded-full text-purple-900 font-black italic">SUPER-MENTOR</span></div>
+                <div className="flex justify-between items-center border-b border-purple-500/10 pb-6"><h3 className="text-[11px] font-black text-purple-400 uppercase tracking-[0.4em]">{t.refinement}</h3><span className="text-[10px] bg-purple-500/10 px-3 py-1 rounded-full text-purple-900 font-black italic">SUPER-MENTOR</span></div>
                 <div className="space-y-6 max-h-[1000px] overflow-y-auto pr-4 custom-scrollbar">
                   {approvedTools.map(tool => {
                     const refined = refinedItems.find(ri => ri.id === tool.id);
                     return (
                       <div key={tool.id} className={`bg-black/40 border ${refined ? 'border-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.05)]' : 'border-white/5'} p-8 rounded-[45px] space-y-6 transition-all duration-700 relative overflow-hidden group`}>
-                        <div className="flex justify-between items-center flex-row-reverse">
+                        <div className="flex justify-between items-center ">
                           <h4 className="font-black text-white text-[13px] leading-snug flex-1">{tool.title}</h4>
                           {refined && <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse mr-4"></div>}
                         </div>
                         <button onClick={() => handleRefineItem(tool)} disabled={refiningId === tool.id} className={`w-full py-5 ${refined ? 'bg-white/5 text-gray-600 cursor-default' : 'bg-gradient-to-tr from-purple-700 to-purple-500 text-white shadow-xl hover:scale-[1.02]'} font-black rounded-2xl text-[10px] transition-all uppercase tracking-widest`}>
-                          {refiningId === tool.id ? 'SYNTHESIZING...' : refined ? 'VOICE SYNCED' : 'APPLY MENTOR VOICE'}
+                          {refiningId === tool.id ? t.synthesizing : refined ? t.voiceSynced : t.mentorVoice}
                         </button>
                         {refined && (
                           <div className="pt-6 border-t border-white/5 space-y-4 animate-in fade-in duration-700">
-                            <div className="space-y-1 text-right">
-                              <p className="text-[9px] text-gray-600 uppercase font-black">Refined Premium Hook</p>
+                            <div className="space-y-1 text-start">
+                              <p className="text-[9px] text-gray-600 uppercase font-black">{t.refinedHook}</p>
                               <p className="text-white text-xs font-black leading-tight italic">"{refined.hook}"</p>
                             </div>
                           </div>
@@ -460,17 +476,17 @@ const App: React.FC = () => {
               </div>
 
               <div className="space-y-8 bg-white/2 p-8 rounded-[50px] border border-white/5 shadow-inner">
-                <div className="flex justify-between items-center border-b border-blue-500/10 pb-6"><h3 className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">03. Catalog</h3><div className="flex items-center gap-3"><span className="text-[10px] text-gray-700 font-black uppercase">Cloud Sync</span><div className={`w-3 h-3 rounded-full ${githubUser ? 'bg-emerald-500' : 'bg-gray-800'}`}></div></div></div>
+                <div className="flex justify-between items-center border-b border-blue-500/10 pb-6"><h3 className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">{t.catalog}</h3><div className="flex items-center gap-3"><span className="text-[10px] text-gray-700 font-black uppercase">{t.cloudSync}</span><div className={`w-3 h-3 rounded-full ${githubUser ? 'bg-emerald-500' : 'bg-gray-800'}`}></div></div></div>
                 <div className="space-y-6 max-h-[1000px] overflow-y-auto pr-4 custom-scrollbar">
                   {refinedItems.map(item => (
-                    <div key={item.id} className="bg-gradient-to-b from-[#0f0f0f] to-black p-8 rounded-[45px] border border-white/5 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 text-right shadow-2xl relative group">
+                    <div key={item.id} className="bg-gradient-to-b from-[#0f0f0f] to-black p-8 rounded-[45px] border border-white/5 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 text-start shadow-2xl relative group">
                        <div className="absolute top-4 left-4 text-[10px] text-gray-800 font-mono">#CAT_{item.id.slice(0,4)}</div>
                        <div className="space-y-3">
-                         <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest border-b border-white/5 pb-2 inline-block">Premium Hook</span>
+                         <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest border-b border-white/5 pb-2 inline-block">{t.premiumHook}</span>
                          <h4 className="font-black text-white text-[15px] leading-tight group-hover:text-purple-400 transition-colors">{item.hook}</h4>
                        </div>
                        <div className="space-y-3 p-5 bg-white/2 rounded-2xl">
-                         <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">The 1% Case</span>
+                         <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{t.the1Percent}</span>
                          <p className="text-gray-400 text-[11px] leading-relaxed font-medium">{item.justification}</p>
                        </div>
                        <div className="pt-4 border-t border-white/5">
@@ -480,7 +496,7 @@ const App: React.FC = () => {
                   ))}
                   {refinedItems.length > 0 && githubUser && (
                     <button onClick={pushToGitHub} className="w-full py-6 bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white font-black rounded-[30px] text-[10px] uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(16,185,129,0.2)] hover:scale-[1.05] transition-all">
-                      {isSyncingToGitHub ? 'PUSHING...' : 'SYNC CATALOG TO GITHUB'}
+                      {isSyncingToGitHub ? t.pushing : t.syncCatalog}
                     </button>
                   )}
                 </div>
@@ -493,17 +509,17 @@ const App: React.FC = () => {
       {view === 'public' && (
         <main className="max-w-7xl mx-auto px-10 pb-40 space-y-40 animate-in fade-in duration-1000">
            <section className="min-h-[85vh] flex flex-col lg:flex-row items-center justify-between gap-16 py-20 relative z-10">
-              <div className="flex-1 text-right space-y-12">
+              <div className="flex-1 text-start space-y-12">
                  <div className="space-y-4">
-                    <div className="flex items-center justify-end gap-3 mb-8"><span className="w-12 h-[1px] bg-white/20"></span><span className="text-[11px] font-black text-purple-400 uppercase tracking-[0.5em]">Cosmic Curation</span></div>
-                    <h1 className="text-8xl md:text-[12rem] font-black leading-[0.8] tracking-tighter uppercase italic">Filter <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-purple-500 via-teal-300 to-white">The Noise.</span></h1>
+                    <div className="flex items-center justify-end gap-3 mb-8"><span className="w-12 h-[1px] bg-white/20"></span><span className="text-[11px] font-black text-purple-400 uppercase tracking-[0.5em]">{t.cosmicCuration}</span></div>
+                    <h1 className="text-8xl md:text-[12rem] font-black leading-[0.8] tracking-tighter uppercase italic">{t.filterNoise1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-purple-500 via-teal-300 to-white">{t.filterNoise2}</span></h1>
                     <div className="flex items-center justify-end gap-10 pt-10">
-                      <p className="text-gray-400 text-2xl md:text-3xl font-light max-w-xl leading-relaxed">אוצרות אנושית קפדנית של כלי ה-AI המובילים בעולם. אנחנו מסננים (99% מהרעש) כדי שתקבלו רק את מה שמשנה באמת.</p>
+                      <p className="text-gray-400 text-2xl md:text-3xl font-light max-w-xl leading-relaxed">{t.pf_desc}</p>
                       <div className="h-40 w-[2px] bg-gradient-to-b from-purple-500/50 to-transparent"></div>
                     </div>
                  </div>
                  <div className="pt-10 flex items-center justify-end gap-8">
-                    <button className="px-16 py-8 bg-white text-black font-black rounded-full text-2xl hover:scale-110 hover:shadow-[0_0_80px_rgba(255,255,255,0.2)] transition-all duration-500 group">JOIN THE 1% ELITE <span className="inline-block transition-transform group-hover:translate-x-[-10px]">←</span></button>
+                    <button className="px-16 py-8 bg-white text-black font-black rounded-full text-2xl hover:scale-110 hover:shadow-[0_0_80px_rgba(255,255,255,0.2)] transition-all duration-500 group">{t.joinElite} <span className="inline-block transition-transform group-hover:translate-x-[-10px]">{lang === 'he' ? '←' : '→'}</span></button>
                  </div>
               </div>
               <div className="flex-1 relative flex justify-center">
@@ -520,7 +536,7 @@ const App: React.FC = () => {
               {refinedItems.map((item) => (
                 <div key={item.id} id={`card-${item.id}`} onClick={() => !isAntigravityActive && setSelectedItem(item)} className={`bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[60px] p-12 space-y-10 transition-all duration-700 relative group overflow-hidden ${isAntigravityActive ? 'hover:cursor-move' : 'hover:bg-white/10 hover:-translate-y-8 cursor-pointer shadow-2xl hover:shadow-purple-500/10'}`}>
                    <div className={`absolute inset-0 bg-black/98 backdrop-blur-2xl z-50 p-12 flex flex-col items-center justify-center transition-all duration-700 gap-10 ${activeShareId === item.id ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`} onClick={(e) => { e.stopPropagation(); setActiveShareId(null); }}>
-                      <h4 className="text-[12px] font-black text-purple-400 uppercase tracking-[0.5em]">Broadcast Signal</h4>
+                      <h4 className="text-[12px] font-black text-purple-400 uppercase tracking-[0.5em]">{t.broadcastSignal}</h4>
                       <div className="grid grid-cols-4 gap-8">
                         {SOCIAL_PLATFORMS.map(platform => (
                           <button key={platform.id} onClick={(e) => executeSocialShare(e, platform, item)} className="group/btn flex flex-col items-center gap-3" title={`Share on ${platform.name}`}>
@@ -529,29 +545,29 @@ const App: React.FC = () => {
                           </button>
                         ))}
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); setActiveShareId(null); }} className="mt-8 px-10 py-4 bg-white/5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition-colors border border-white/5">Close Channel</button>
+                      <button onClick={(e) => { e.stopPropagation(); setActiveShareId(null); }} className="mt-8 px-10 py-4 bg-white/5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition-colors border border-white/5">{t.closeChannel}</button>
                    </div>
                    
-                   <div className="space-y-6 text-right">
-                      <div className="flex justify-between items-center flex-row-reverse border-b border-white/5 pb-6 mb-4">
-                        <span className="text-[11px] font-black text-teal-400 uppercase tracking-[0.4em]">Premium Signal</span>
+                   <div className="space-y-6 text-start">
+                      <div className="flex justify-between items-center  border-b border-white/5 pb-6 mb-4">
+                        <span className="text-[11px] font-black text-teal-400 uppercase tracking-[0.4em]">{t.premiumSignal}</span>
                         <div className="flex items-center gap-4"><span className="text-[10px] text-gray-700 font-black tracking-widest uppercase">ID_{item.id.slice(0,6)}</span></div>
                       </div>
                       <h3 className="text-4xl font-black text-white leading-[1.1] group-hover:text-purple-400 transition-colors duration-500 italic uppercase">{item.hook}</h3>
                    </div>
                    
-                   <div className="space-y-4 text-right">
-                      <h4 className="text-[11px] font-black text-gray-600 uppercase tracking-[0.3em]">The Cagan/Graham Signal:</h4>
+                   <div className="space-y-4 text-start">
+                      <h4 className="text-[11px] font-black text-gray-600 uppercase tracking-[0.3em]">{t.caganSignal}</h4>
                       <p className="text-gray-400 text-lg leading-relaxed font-medium line-clamp-3">{item.justification}</p>
                    </div>
                    
-                   <div className="pt-10 border-t border-white/10 italic text-white font-black text-right text-2xl leading-snug">"{item.verdict}"</div>
+                   <div className="pt-10 border-t border-white/10 italic text-white font-black text-start text-2xl leading-snug">"{item.verdict}"</div>
                    
                    <div className="flex justify-between items-center pt-8 no-print border-t border-white/5 mt-4">
-                      <button className="text-[11px] font-black text-purple-500 uppercase tracking-[0.3em] group-hover:underline transition-all">Deep Analysis</button>
+                      <button className="text-[11px] font-black text-purple-500 uppercase tracking-[0.3em] group-hover:underline transition-all">{t.deepAnalysis}</button>
                       <button onClick={(e) => { e.stopPropagation(); setActiveShareId(item.id); }} className="px-8 py-4 bg-white/5 rounded-full flex items-center gap-3 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all border border-white/10">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-                        Share
+                        {t.share}
                       </button>
                    </div>
                 </div>
@@ -565,37 +581,37 @@ const App: React.FC = () => {
                    <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-purple-500 to-teal-400"></div>
                    <button onClick={() => setSelectedItem(null)} className="absolute top-12 left-12 w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all duration-500 text-2xl">✕</button>
                    
-                   <header className="space-y-6 text-right">
-                      <div className="flex justify-between items-center flex-row-reverse mb-4">
+                   <header className="space-y-6 text-start">
+                      <div className="flex justify-between items-center  mb-4">
                         <div className="flex items-center gap-4">
                            <span className="w-10 h-10 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 font-black">S</span>
-                           <span className="text-sm font-black text-purple-400 uppercase tracking-[0.4em]">Cosmic Insight Signal</span>
+                           <span className="text-sm font-black text-purple-400 uppercase tracking-[0.4em]">{t.cosmicInsight}</span>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); setActiveShareId(selectedItem.id); }} className="px-10 py-4 bg-purple-600/10 text-purple-400 rounded-full text-[11px] font-black uppercase tracking-[0.3em] hover:bg-purple-600 hover:text-white transition-all">Distribute Signal</button>
+                        <button onClick={(e) => { e.stopPropagation(); setActiveShareId(selectedItem.id); }} className="px-10 py-4 bg-purple-600/10 text-purple-400 rounded-full text-[11px] font-black uppercase tracking-[0.3em] hover:bg-purple-600 hover:text-white transition-all">{t.distributeSignal}</button>
                       </div>
                       <h2 className="text-6xl md:text-8xl font-black text-white leading-tight italic uppercase">{selectedItem.hook}</h2>
                    </header>
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
-                      <div className="space-y-10 text-right">
+                      <div className="space-y-10 text-start">
                          <div className="space-y-4">
-                            <h4 className="text-[12px] font-black text-gray-600 uppercase tracking-[0.4em]">Deep Analysis: The 1% Case</h4>
-                            <div className="h-[2px] w-20 bg-purple-500/30 mr-0 ml-auto"></div>
+                            <h4 className="text-[12px] font-black text-gray-600 uppercase tracking-[0.4em]">{t.deepAnalysis1P}</h4>
+                            <div className="h-[2px] w-20 bg-purple-500/30 mr-0 ms-auto"></div>
                          </div>
                          <p className="text-2xl text-gray-300 leading-relaxed font-light">{selectedItem.justification}</p>
                       </div>
                       <div className="space-y-12">
-                         <div className="bg-purple-500/5 border border-purple-500/20 p-12 rounded-[60px] text-right space-y-6 relative overflow-hidden group hover:bg-purple-500/10 transition-colors">
+                         <div className="bg-purple-500/5 border border-purple-500/20 p-12 rounded-[60px] text-start space-y-6 relative overflow-hidden group hover:bg-purple-500/10 transition-colors">
                             <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-purple-500/5 rotate-45 pointer-events-none"></div>
-                            <h4 className="text-[12px] font-black text-purple-400 uppercase tracking-[0.4em]">The Super-Mentor Verdict</h4>
+                            <h4 className="text-[12px] font-black text-purple-400 uppercase tracking-[0.4em]">{t.mentorVerdict}</h4>
                             <p className="text-3xl font-black text-white italic leading-snug relative z-10">"{selectedItem.verdict}"</p>
                          </div>
-                         <div className="bg-white/5 p-12 rounded-[60px] text-right space-y-8 border border-white/5">
-                            <h4 className="text-[12px] font-black text-gray-600 uppercase tracking-[0.4em]">Verified Source Data</h4>
+                         <div className="bg-white/5 p-12 rounded-[60px] text-start space-y-8 border border-white/5">
+                            <h4 className="text-[12px] font-black text-gray-600 uppercase tracking-[0.4em]">{t.verifiedData}</h4>
                             <div className="space-y-4">
                                <p className="text-white font-black text-lg leading-snug">{selectedItem.originalTitle}</p>
                                <div className="pt-4">
-                                  <a href={selectedItem.originalLink} target="_blank" rel="noopener noreferrer" className="inline-block px-12 py-5 bg-white text-black font-black rounded-full text-[11px] uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-xl">Launch Research Channel</a>
+                                  <a href={selectedItem.originalLink} target="_blank" rel="noopener noreferrer" className="inline-block px-12 py-5 bg-white text-black font-black rounded-full text-[11px] uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-xl">{t.launchResearch}</a>
                                </div>
                             </div>
                          </div>
@@ -608,20 +624,20 @@ const App: React.FC = () => {
       )}
 
       {view === 'analysis' && data && (
-        <div className="max-w-7xl mx-auto px-10 py-32 space-y-20 text-right animate-in fade-in duration-1000">
+        <div className="max-w-7xl mx-auto px-10 py-32 space-y-20 text-start animate-in fade-in duration-1000">
            <header className="space-y-8">
-              <div className="flex items-center justify-end gap-3"><span className="text-[12px] font-black text-purple-400 uppercase tracking-[0.5em]">Executive Strategy</span><span className="w-20 h-[1px] bg-white/20"></span></div>
-              <h1 className="text-9xl font-black uppercase italic tracking-tighter leading-[0.8]">Strategic <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-white to-gray-700">Blueprint.</span></h1>
-              <p className="text-gray-500 text-4xl font-light max-w-3xl mr-auto leading-relaxed">The "Super-Mentor" Vision for AI Ecosystem Dominance in 2026.</p>
+              <div className="flex items-center justify-end gap-3"><span className="text-[12px] font-black text-purple-400 uppercase tracking-[0.5em]">{t.execStrategy}</span><span className="w-20 h-[1px] bg-white/20"></span></div>
+              <h1 className="text-9xl font-black uppercase italic tracking-tighter leading-[0.8]">{t.stratBlueprint1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-white to-gray-700">{t.stratBlueprint2}</span></h1>
+              <p className="text-gray-500 text-4xl font-light max-w-3xl me-auto leading-relaxed">{t.blueprintDesc}</p>
            </header>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mt-20">
               <div className="bg-[#0a0a0a] p-16 rounded-[70px] border border-white/5 space-y-12 shadow-2xl relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-full h-1 bg-purple-500/20"></div>
-                 <h3 className="text-4xl font-black text-purple-400 uppercase italic tracking-tight">Market Frictions</h3>
+                 <h3 className="text-4xl font-black text-purple-400 uppercase italic tracking-tight">{t.marketFrictions}</h3>
                  <div className="space-y-10">
                     {data.friction.map((f, i) => (
-                      <div key={i} className="flex gap-8 items-start flex-row-reverse group">
+                      <div key={i} className="flex gap-8 items-start  group">
                          <span className="text-purple-500 font-black text-5xl opacity-10 group-hover:opacity-100 transition-all duration-500 italic">0{i+1}</span>
                          <p className="text-gray-400 text-2xl font-medium leading-relaxed pt-3 group-hover:text-white transition-colors">{f}</p>
                       </div>
@@ -630,11 +646,11 @@ const App: React.FC = () => {
               </div>
               <div className="bg-[#0a0a0a] p-16 rounded-[70px] border border-white/5 space-y-12 shadow-2xl relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-full h-1 bg-teal-500/20"></div>
-                 <h3 className="text-4xl font-black text-emerald-400 uppercase italic tracking-tight">Competitive Landscape</h3>
+                 <h3 className="text-4xl font-black text-emerald-400 uppercase italic tracking-tight">{t.compLandscape}</h3>
                  <div className="space-y-6">
                     {data.snapshot.map((c, i) => (
-                      <div key={i} className="bg-white/2 p-8 rounded-[40px] border border-white/5 flex justify-between items-center group flex-row-reverse hover:bg-white/5 transition-all duration-500">
-                         <div className="text-right">
+                      <div key={i} className="bg-white/2 p-8 rounded-[40px] border border-white/5 flex justify-between items-center group  hover:bg-white/5 transition-all duration-500">
+                         <div className="text-start">
                             <h4 className="text-2xl font-black text-white group-hover:text-emerald-400 transition-colors">{c.name}</h4>
                             <p className="text-gray-500 text-lg mt-2 font-medium">{c.promise}</p>
                          </div>
@@ -647,7 +663,7 @@ const App: React.FC = () => {
            
            {data.groundingUrls && data.groundingUrls.length > 0 && (
              <div className="mt-32 p-16 bg-white/2 rounded-[70px] border border-white/5 backdrop-blur-3xl">
-                <h3 className="text-[12px] font-black text-gray-500 uppercase tracking-[0.5em] mb-10 border-b border-white/5 pb-6">Validated Intelligence Sources (April 2026 Grounding)</h3>
+                <h3 className="text-[12px] font-black text-gray-500 uppercase tracking-[0.5em] mb-10 border-b border-white/5 pb-6">{t.validatedIntel}</h3>
                 <ul className="flex flex-wrap gap-6">
                    {data.groundingUrls.map((url, i) => (
                      <li key={i}>
@@ -664,9 +680,9 @@ const App: React.FC = () => {
       )}
 
       {view === 'spec' && data && (
-        <div className="max-w-7xl mx-auto px-10 py-32 space-y-20 text-right animate-in slide-in-from-right-8 duration-1000">
-           <div className="flex items-center justify-end gap-3 mb-4"><span className="text-[12px] font-black text-teal-400 uppercase tracking-[0.5em]">Product Roadmap</span><span className="w-20 h-[1px] bg-white/20"></span></div>
-           <h1 className="text-9xl font-black text-white tracking-tighter uppercase leading-[0.8] italic">MVP <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-teal-400 to-white">Spec.</span></h1>
+        <div className="max-w-7xl mx-auto px-10 py-32 space-y-20 text-start animate-in slide-in-from-right-8 duration-1000">
+           <div className="flex items-center justify-end gap-3 mb-4"><span className="text-[12px] font-black text-teal-400 uppercase tracking-[0.5em]">{t.productRoadmap}</span><span className="w-20 h-[1px] bg-white/20"></span></div>
+           <h1 className="text-9xl font-black text-white tracking-tighter uppercase leading-[0.8] italic">{t.mvpSpec1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-teal-400 to-white">{t.mvpSpec2}</span></h1>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-20">
               {data.features.map((f, i) => (
                 <div key={i} className="bg-[#0a0a0a] p-16 rounded-[70px] border border-white/5 hover:border-teal-500/30 transition-all duration-700 group relative overflow-hidden shadow-2xl">
@@ -686,7 +702,7 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      <ContactForm isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+      <ContactForm isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} lang={lang} />
     </div>
   );
 };
