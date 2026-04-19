@@ -96,17 +96,7 @@ export const translations = {
     message: 'Message',
     messagePlaceholder: 'Tell us about your strategic goals...',
     sending: 'Sending...',
-    requestAccess: 'Request Access',
-    // Discovery
-    autonomousEngine: 'Autonomous Engine',
-    section01: 'Section 01',
-    prodLine1: 'Production',
-    prodLine2: 'Line.',
-    prodLineDesc: 'The premium content distillation engine. Noise filtering, signal detection, and real-time brand voice application.',
-    activePersona: 'Active Brand Persona',
-    regenPersona: 'Regenerate Voice',
-    scaffolding: 'Scaffolding...',
-    initMascot: 'Initialize Mascot'
+    requestAccess: 'Request Access'
   },
   he: {
     navTitle: 'AI CURATOR.',
@@ -203,16 +193,6 @@ export const translations = {
     message: 'הודעה',
     messagePlaceholder: 'ספר לנו על המטרות האסטרטגיות שלך...',
     sending: 'שולח...',
-    requestAccess: 'בקש גישה',
-    // Discovery
-    autonomousEngine: 'מנוע אוטונומי',
-    section01: 'חלק 01',
-    prodLine1: 'קו',
-    prodLine2: 'ייצור.',
-    prodLineDesc: 'מנוע הזיקוק לתוכן פרימיום. סינון רעשים, זיהוי סיגנלים והחלת קול המותג בזמן אמת.',
-    activePersona: 'פרסונט מותג פעילה',
-    regenPersona: 'ייצר קול מחדש',
-    scaffolding: 'בונה...',
-    initMascot: 'אתחל קמע'
+    requestAccess: 'בקש גישה'
   }
 }

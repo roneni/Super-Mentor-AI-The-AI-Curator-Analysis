@@ -1,7 +1,11 @@
 # Super-Mentor-AI: The AI Curator & Strategy Engine
 
+![Chaos: Drowning in Generic AI vs Nirvana: Super Mentor AI Insights](./assets/chaos-vs-nirvana.jpg)
+
 ## 1. Short Description
 **Super-Mentor-AI** is an elite, real-time strategic intelligence engine. It fuses the mental models of top product visionaries (Marty Cagan, Paul Graham, W. Chan Kim) with live market data to curate, refine, and validate your next big AI product idea. It doesn't just summarize news; it identifies "Blue Ocean" opportunities and unfair advantages in the rapidly evolving AI landscape.
+
+![Ignoring the Noise - AI Doomsday vs Zen Mode](./assets/robot-coffee.jpg)
 
 ## 2. Pricing Tiers
 
@@ -34,6 +38,8 @@ When you first launch the platform, the **Market Analysis Engine** immediately k
 *   **Strategy View:** You are presented with a comprehensive strategic blueprint. This includes an ERRC grid (Eliminate, Reduce, Raise, Create) based on Blue Ocean Strategy, an analysis of current market friction, and a map of the competitive landscape.
 *   **MVP Spec View:** The engine auto-generates a concrete product roadmap, outlining the exact features needed to execute your strategy and win the market.
 
+![Blue Ocean Meeting - ERRC Grid Analysis](./assets/blue-ocean-meeting.png)
+
 ### Step 2: The Production Line (Signal Discovery)
 Once your strategy is set, you move to the "Production Line" to hunt for new opportunities and market shifts.
 *   **Configure the Radar:** Use granular filters to target specific AI domains (e.g., Experimental Tools, Autonomous Agents), specific companies, or subtopics. You can also toggle "Trending" or "Viral" modifiers.
@@ -44,10 +50,14 @@ Raw news is just noise until it is synthesized. In the Production Line, you revi
 *   **The Mentor Panel:** By clicking "Refine Signal", the **Refining Engine** processes the raw data through the mental models of elite product visionaries: Marty Cagan (Product/Market Fit), W. Chan Kim (Blue Ocean), and Paul Graham (Unfair Advantages).
 *   **The Output:** It transforms the raw news into a high-value strategic asset containing a "Premium Hook", "The 1% Case" (why this matters to the top 1% of builders), and a definitive "Curator Verdict".
 
+![Information Overload vs Zen Mode Synthesis](./assets/zen-mode.jpg)
+
 ### Step 4: The Public Feed & Distribution (Action)
 Once a signal is refined, it is automatically moved to your "Public Feed".
 *   **Thought Leadership:** From the Public Feed, you can instantly distribute these synthesized insights to Twitter, LinkedIn, or Reddit to build your audience and establish authority.
 *   **Knowledge Sync:** Use the built-in "Push to GitHub" integration to sync your curated intelligence directly into your own repositories, internal wikis, or team knowledge bases.
+
+---
 
 ### Tech Stack
 - Frontend: React 18, Vite, Tailwind CSS

@@ -286,7 +286,7 @@ const App: React.FC = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-600/5 blur-[150px] rounded-full"></div>
       </div>
 
-      <nav className="max-w-7xl mx-auto px-10 py-10 flex justify-between items-center no-print relative z-[100]">
+      <nav className={`mx-auto px-10 py-10 flex justify-between items-center no-print relative z-[100] ${view === 'public' ? 'max-w-7xl' : 'max-w-[1920px]'}`}>
         <div className="flex items-center gap-10">
           <div className="flex flex-col">
             <div className="text-3xl font-black tracking-tighter uppercase italic bg-clip-text text-transparent bg-gradient-to-l from-white to-gray-600">{t.navTitle}</div>
@@ -316,12 +316,12 @@ const App: React.FC = () => {
       </nav>
 
       {view === 'discovery' && (
-        <div className="max-w-7xl mx-auto px-10 pb-40 space-y-16 animate-in slide-in-from-bottom-8 duration-1000">
+        <div className="max-w-[1920px] mx-auto px-10 pb-40 space-y-16 animate-in slide-in-from-bottom-8 duration-1000">
           <header className={`flex flex-col md:flex-row justify-between items-end gap-10 text-start border-b border-white/5 pb-16`}>
              <div className="space-y-6">
-                <div className={`flex items-center gap-3 ${lang === 'he' ? 'justify-end ' : ''}`}><span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-widest rounded-full">{t.autonomousEngine}</span><h2 className="text-gray-600 text-sm font-black uppercase tracking-[0.4em]">{t.section01}</h2></div>
-                <h1 className="text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">{t.prodLine1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-purple-400 to-teal-300">{t.prodLine2}</span></h1>
-                <p className={`text-gray-500 text-xl font-medium max-w-xl ${lang === 'he' ? 'me-auto' : 'ms-auto'} leading-relaxed`}>{t.prodLineDesc}</p>
+                <div className={`flex items-center gap-3 ${lang === 'he' ? 'justify-end ' : ''}`}><span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-widest rounded-full">{t.pl_engine}</span><h2 className="text-gray-600 text-sm font-black uppercase tracking-[0.4em]">{t.pl_section}</h2></div>
+                <h1 className="text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">{t.pl_title1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-purple-400 to-teal-300">{t.pl_title2}</span></h1>
+                <p className={`text-gray-500 text-xl font-medium max-w-4xl ${lang === 'he' ? 'me-auto' : 'ms-auto'} leading-relaxed`}>{t.pl_desc}</p>
              </div>
              <div className="flex flex-col items-end gap-6 p-10 bg-white/5 rounded-[40px] border border-white/5 backdrop-blur-3xl shadow-2xl">
                 <div className="flex flex-col items-end">
@@ -332,11 +332,11 @@ const App: React.FC = () => {
                       <div className="absolute inset-0 bg-purple-500/20 opacity-0 group-hover:opacity-100 transition rounded-3xl blur-xl"></div>
                     </div>
                   ) : (
-                    <div className="w-24 h-24 bg-gray-900 rounded-3xl flex items-center justify-center text-gray-700 border border-dashed border-gray-800">EMPTY</div>
+                    <div className="w-24 h-24 bg-gray-900 rounded-3xl flex items-center justify-center text-gray-700 border border-dashed border-gray-800">{t.emptyBrand}</div>
                   )}
                 </div>
                 <button onClick={handleMascotGenerate} disabled={isGeneratingMascot} className={`px-10 py-5 ${mascotUrl ? 'bg-white/5 text-gray-400 border border-white/10' : 'bg-white text-black'} font-black rounded-full text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition shadow-xl`}>
-                  {isGeneratingMascot ? t.scaffolding : mascotUrl ? t.regenPersona : t.initMascot}
+                  {isGeneratingMascot ? (lang === 'he' ? 'בונה...' : 'SCAFFOLDING...') : mascotUrl ? t.regenVoice : t.initMascot}
                 </button>
              </div>
           </header>
@@ -624,11 +624,11 @@ const App: React.FC = () => {
       )}
 
       {view === 'analysis' && data && (
-        <div className="max-w-7xl mx-auto px-10 py-32 space-y-20 text-start animate-in fade-in duration-1000">
+        <div className="max-w-[1920px] mx-auto px-10 py-32 space-y-20 text-start animate-in fade-in duration-1000">
            <header className="space-y-8">
               <div className="flex items-center justify-end gap-3"><span className="text-[12px] font-black text-purple-400 uppercase tracking-[0.5em]">{t.execStrategy}</span><span className="w-20 h-[1px] bg-white/20"></span></div>
               <h1 className="text-9xl font-black uppercase italic tracking-tighter leading-[0.8]">{t.stratBlueprint1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-white to-gray-700">{t.stratBlueprint2}</span></h1>
-              <p className="text-gray-500 text-4xl font-light max-w-3xl me-auto leading-relaxed">{t.blueprintDesc}</p>
+              <p className="text-gray-500 text-4xl font-light max-w-5xl me-auto leading-relaxed">{t.blueprintDesc}</p>
            </header>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mt-20">
@@ -680,7 +680,7 @@ const App: React.FC = () => {
       )}
 
       {view === 'spec' && data && (
-        <div className="max-w-7xl mx-auto px-10 py-32 space-y-20 text-start animate-in slide-in-from-right-8 duration-1000">
+        <div className="max-w-[1920px] mx-auto px-10 py-32 space-y-20 text-start animate-in slide-in-from-right-8 duration-1000">
            <div className="flex items-center justify-end gap-3 mb-4"><span className="text-[12px] font-black text-teal-400 uppercase tracking-[0.5em]">{t.productRoadmap}</span><span className="w-20 h-[1px] bg-white/20"></span></div>
            <h1 className="text-9xl font-black text-white tracking-tighter uppercase leading-[0.8] italic">{t.mvpSpec1} <br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-teal-400 to-white">{t.mvpSpec2}</span></h1>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-20">
